@@ -96,6 +96,7 @@ class Computer:
                 return "Halt"
             else:
                 print("ERROR!" + str(operation.opcode))
+                return None
 
 
 def run_amplifiers(program, phases: [int]):
@@ -106,18 +107,21 @@ def run_amplifiers(program, phases: [int]):
         amplifiers.append(Computer(memory))
         i += 1
 
+    # set phases for each amp
+    i = 0
+    while i < len(phases):
+        amp = amplifiers[i]
+        amp.run([phases[i]])
+        i += 1
+
+    # calculate thrust
     thrust = 0
     done = False
-    add_phase = True
-    
     while not done:
         i = 0
         while i < len(phases):
             amp = amplifiers[i]
-            if add_phase:
-                inputs = [phases[i], thrust]
-            else:
-                inputs = [thrust]
+            inputs = [thrust]
             amp.run(inputs)
             output = amp.read_output()
             if output == None:
@@ -125,8 +129,6 @@ def run_amplifiers(program, phases: [int]):
                 break
             thrust = output
             i += 1
-        add_phase = False
-    #print(thrust)
     return thrust
 
 
@@ -163,7 +165,7 @@ amplifier_program = [int(n) for n in text.read().split(",")]
 
 def find_largest_thrust():
     allcombinations = []
-    combinations([5,6,7,8,9], [], allcombinations)
+    combinations([5, 6, 7, 8, 9], [], allcombinations)
     largest = 0
     best_combination = []
     for combination in allcombinations:
