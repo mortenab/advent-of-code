@@ -116,8 +116,7 @@ def run_amplifiers(program, phases: [int]):
 
     # calculate thrust
     thrust = 0
-    done = False
-    while not done:
+    while True:
         i = 0
         while i < len(phases):
             amp = amplifiers[i]
@@ -125,11 +124,9 @@ def run_amplifiers(program, phases: [int]):
             amp.run(inputs)
             output = amp.read_output()
             if output == None:
-                done = True
-                break
+                return thrust
             thrust = output
             i += 1
-    return thrust
 
 
 def permutations(range_from, range_to, arr, length, output):
@@ -160,7 +157,6 @@ def combinations(input, acc, output):
 
 text = open('input.txt')
 amplifier_program = [int(n) for n in text.read().split(",")]
-# run_amplifiers(amplifier_program, [9,8,7,6,5])
 
 
 def find_largest_thrust():
