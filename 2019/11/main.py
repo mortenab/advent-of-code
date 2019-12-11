@@ -45,22 +45,20 @@ class Computer:
         else:  # relative offset
             return self.memory[self.relative_base_offset+val]
 
+    def exec_operation(self, op: Operation, operator):
+        operands = self.get_operands(op)
+        dest_idx = self.get_destination_ptr(op.mode3, self.pointer+3)
+        self.memory[dest_idx] = operator(operands[0], operands[1])
+        self.pointer += 4
+
     def run(self, inputs):
         input_counter = 0
         while True:
             operation = self.parse_operation()
             if operation.opcode == 1:  # add
-                operands = self.get_operands(operation)
-                dest_idx = self.get_destination_ptr(
-                    operation.mode3, self.pointer+3)
-                self.memory[dest_idx] = operands[0] + operands[1]
-                self.pointer += 4
+                self.exec_operation(operation, lambda a, b: a+b)
             elif operation.opcode == 2:  # multiply
-                operands = self.get_operands(operation)
-                dest_idx = self.get_destination_ptr(
-                    operation.mode3, self.pointer+3)
-                self.memory[dest_idx] = operands[0] * operands[1]
-                self.pointer += 4
+                self.exec_operation(operation, lambda a, b: a*b)
             elif operation.opcode == 3:  # input
                 if input_counter == len(inputs):
                     # wait for next input and dont increment pointer
@@ -82,17 +80,9 @@ class Computer:
                 operands = self.get_operands(operation)
                 self.pointer = operands[1] if operands[0] == 0 else self.pointer+3
             elif operation.opcode == 7:  # less than
-                operands = self.get_operands(operation)
-                dest_idx = self.get_destination_ptr(
-                    operation.mode3, self.pointer+3)
-                self.memory[dest_idx] = 1 if operands[0] < operands[1] else 0
-                self.pointer += 4
+                self.exec_operation(operation, lambda a, b: 1 if a < b else 0)
             elif operation.opcode == 8:  # equals
-                operands = self.get_operands(operation)
-                dest_idx = self.get_destination_ptr(
-                    operation.mode3, self.pointer+3)
-                self.memory[dest_idx] = 1 if operands[0] == operands[1] else 0
-                self.pointer += 4
+                self.exec_operation(operation, lambda a, b: 1 if a == b else 0)
             elif operation.opcode == 9:  # set base
                 operand = self.get_operand(operation)
                 self.relative_base_offset += operand
